@@ -7,7 +7,7 @@
 <!-- </ion-header> -->
 
 <ion-content [fullscreen]="true">
-  <ion-card>
+  <ion-card (click)="expandCard()">
     <ion-card-header>
       <ion-card-title>Ensolarado</ion-card-title>
       <ion-card-subtitle>São Sebastião, {{ clock() | date: 'longDate' }}</ion-card-subtitle>
@@ -25,7 +25,6 @@
     <!-- 80, 81, 82 	  Rain showers: Slight, moderate, and violent -->
     <!-- 85, 86 	      Snow showers slight and heavy -->
     <!-- 95 * 	        Thunderstorm: Slight or moderate -->
-    <!-- 96, 99 * 	    Thunderstorm with slight and heavy hail -->
     <ion-card-content style="display: flex;">
       <!-- @TODO: Add weather icons -->
       @switch (weatherCode()) {
@@ -43,6 +42,11 @@
       <div style="padding: 6px;"></div>
       <h2 style="font-size: 24px;">{{currentTemperature() | number:'1.0-0'}}°C</h2>
     </ion-card-content>
+  </ion-card>
+  <ion-card [ngStyle]="{'opacity': expanded()}">
+    <ion-card-header>
+      <ion-card-title>Previsão do tempo</ion-card-title>
+    </ion-card-header>
   </ion-card>
 
 </ion-content>
