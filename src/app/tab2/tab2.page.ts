@@ -2,6 +2,7 @@ import { AfterViewInit, CUSTOM_ELEMENTS_SCHEMA, Component, ElementRef, OnInit, V
 import { IonHeader, IonToolbar, IonTitle, IonContent } from '@ionic/angular/standalone';
 import { ExploreContainerComponent } from '../explore-container/explore-container.component';
 import { GoogleMap } from '@capacitor/google-maps';
+import { environment } from 'src/environments/environment';
 
 @Component({
     selector: 'app-tab2',
@@ -14,7 +15,7 @@ import { GoogleMap } from '@capacitor/google-maps';
 export class Tab2Page implements AfterViewInit {
     @ViewChild('map')
     mapRef: ElementRef<HTMLElement>;
-    apiKey = 'AIzaSyAQ7WGNQ9ag9XtSceGFXDHU_YsPIwiNFhY';
+    apiKey = environment.apiKey;
     newMap: GoogleMap
     currentLocation = signal({ lat: -23.76, lng: -45.4097 });
 

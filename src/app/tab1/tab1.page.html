@@ -7,6 +7,12 @@
 <!-- </ion-header> -->
 
 <ion-content [fullscreen]="true">
+  <ion-card class="">
+    <ion-card-header class="">
+      <ion-card-title style="align-self: center; font-size: 3rem;">{{ clock() | date: 'shortTime'}}</ion-card-title>
+      <ion-card-subtitle></ion-card-subtitle>
+    </ion-card-header>
+  </ion-card>
   <ion-card (click)="expandCard()">
     <ion-card-header>
       <ion-card-title>Ensolarado</ion-card-title>
@@ -46,6 +52,12 @@
   <ion-card [ngStyle]="{'opacity': expanded()}">
     <ion-card-header>
       <ion-card-title>Previsão do tempo</ion-card-title>
+      <!-- TODO: Fix this later -->
+      <!-- @for (time of weatherData().hourly.time; track time) { -->
+      <!-- @for (precipitation of weatherData().hourly.precipitation; track precipitation) { -->
+      <!-- <p>{{time | date: 'shortTime'}} : {{precipitation | number: '1.2-2'}}</p> -->
+      <!-- } -->
+      <!-- } -->
     </ion-card-header>
   </ion-card>
 
