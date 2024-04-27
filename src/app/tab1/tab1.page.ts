@@ -1,13 +1,21 @@
-import { Component, LOCALE_ID, OnInit, signal } from '@angular/core';
-import { ExploreContainerComponent } from '../explore-container/explore-container.component';
-import { BehaviorSubject, map, tap, timer } from 'rxjs';
-import { AsyncPipe, CommonModule, DATE_PIPE_DEFAULT_OPTIONS, DatePipe, DecimalPipe, registerLocaleData } from '@angular/common';
+import {Component, LOCALE_ID, OnInit, signal} from '@angular/core';
+import {ExploreContainerComponent} from '../explore-container/explore-container.component';
+import {BehaviorSubject, map, tap, timer} from 'rxjs';
+import {
+  AsyncPipe,
+  CommonModule,
+  DATE_PIPE_DEFAULT_OPTIONS,
+  DatePipe,
+  DecimalPipe,
+  registerLocaleData
+} from '@angular/common';
 import localePt from '@angular/common/locales/pt';
-import { WeatherService } from '../weather.service';
-import { IonicModule } from '@ionic/angular';
-import { addIcons } from 'ionicons';
-import { sunnyOutline, partlySunnyOutline } from 'ionicons/icons';
-import { AppChartComponent } from '../components/graph/chart.component';
+import {WeatherService} from '../weather.service';
+import {IonicModule} from '@ionic/angular';
+import {addIcons} from 'ionicons';
+import {sunnyOutline, partlySunnyOutline} from 'ionicons/icons';
+import {AppChartComponent} from '../components/graph/chart.component';
+import {IonHeader, IonTitle, IonToolbar} from "@ionic/angular/standalone";
 
 registerLocaleData(localePt);
 
@@ -18,25 +26,40 @@ export interface WeatherData {
 }
 
 export interface CurrentData {
-  time: Date; temperature2m: number; apparentTemperature: number; precipitation: number; rain: number; weatherCode: number;
+  time: Date;
+  temperature2m: number;
+  apparentTemperature: number;
+  precipitation: number;
+  rain: number;
+  weatherCode: number;
 }
+
 export interface HourlyData {
-  time: Date[]; temperature2m: Float32Array; relativeHumidity2m: Float32Array; precipitation: Float32Array; rain: Float32Array;
+  time: Date[];
+  temperature2m: Float32Array;
+  relativeHumidity2m: Float32Array;
+  precipitation: Float32Array;
+  rain: Float32Array;
 }
 
 export interface ParsedHourlyData {
-  time: Date; temperature2m: number; relativeHumidity2m: number; precipitation: number; rain: number;
+  time: Date;
+  temperature2m: number;
+  relativeHumidity2m: number;
+  precipitation: number;
+  rain: number;
 }
+
 @Component({
   selector: 'app-tab1',
   templateUrl: 'tab1.page.html',
   styleUrls: ['tab1.page.scss'],
   standalone: true,
   providers: [
-    { provide: LOCALE_ID, useValue: 'pt-BR' },
-    { provide: DATE_PIPE_DEFAULT_OPTIONS, useValue: { locale: 'pt-BR' } }
+    {provide: LOCALE_ID, useValue: 'pt-BR'},
+    {provide: DATE_PIPE_DEFAULT_OPTIONS, useValue: {locale: 'pt-BR'}}
   ],
-  imports: [IonicModule, ExploreContainerComponent, DatePipe, AsyncPipe, DecimalPipe, CommonModule, AppChartComponent],
+  imports: [IonicModule, ExploreContainerComponent, DatePipe, AsyncPipe, DecimalPipe, CommonModule, AppChartComponent, IonHeader, IonTitle, IonToolbar],
 })
 export class Tab1Page implements OnInit {
   public today = new Date().getDay();
@@ -51,7 +74,7 @@ export class Tab1Page implements OnInit {
   constructor(
     private weatherService: WeatherService,
   ) {
-    addIcons({ partlySunnyOutline, sunnyOutline });
+    addIcons({partlySunnyOutline, sunnyOutline});
   }
 
   ngOnInit(): void {

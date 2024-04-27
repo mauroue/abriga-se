@@ -1,14 +1,27 @@
+
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-title>
+      {{title | async}}
+    </ion-title>
+  </ion-toolbar>
+</ion-header>
+
 <ion-tabs>
   <ion-tab-bar slot="bottom">
-    <ion-tab-button tab="tab1" href="/tabs/tab1">
-      <ion-icon name="sunny-outline"></ion-icon>
-      <ion-label>Clima</ion-label>
-    </ion-tab-button>
+  @for(item of tabs; track $index) {
 
-    <ion-tab-button tab="tab2" href="/tabs/tab2">
-      <ion-icon name="navigate-circle-outline"></ion-icon>
-      <ion-label>Local</ion-label>
+    <ion-tab-button
+      [selected]="tabNum === item.order"
+      tab="{{'tab'+ ($index + 1)}}"
+      (click)="switchTab(item.order)"
+      href="{{'/tabs/tab' + ($index + 1)}}"
+    >
+      <ion-icon [name]=item.icon></ion-icon>
+      <ion-label>{{item.name}}</ion-label>
     </ion-tab-button>
-
+  }
   </ion-tab-bar>
 </ion-tabs>
+
+
