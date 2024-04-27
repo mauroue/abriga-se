@@ -57,7 +57,23 @@ export class Tab1Page implements OnInit {
     this.weatherService.getWeatherApi$
       .pipe(
         tap((data) => this.weatherData.update(() => data)),
-        tap(data => console.log(data)),
+        tap(data => {
+          const hourlyWeather = data.hourly.time
+            .filter((time) => {
+              if (time < this.clock()) return false
+              return true
+            })
+            .map((time, index) => {
+              return {
+                "time": time,
+                "rain": data.hourly.rain[index],
+                "temperature": data.hourly.temperature2m[index],
+                "precipitation": data.hourly.precipitation[index],
+                "relativeHumidity": data.hourly.relativeHumidity2m[index]
+              }
+            })
+          console.log(hourlyWeather)
+        }),
         tap(data => this.weatherCode.update(() => data.current.weatherCode)),
         tap(data => this.currentTemperature.update(() => data.current.temperature2m)),
       ).subscribe()
