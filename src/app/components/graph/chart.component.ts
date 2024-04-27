@@ -15,12 +15,14 @@ export class AppChartComponent {
   rawWeatherData = this.weatherService.hourlyWeather()
   parsedData = this.rawWeatherData
     .map((data) => {
-      return { label: data.time.getHours().toString() + 'h', y: Math.round(data.temperature2m * 100) / 100 }
+      const date = `${data.time.getDay()}/${data.time.getMonth()}-${data.time.getHours()}h`
+      return { label: date, y: Math.round(data.temperature2m * 100) / 100 }
     })
   options = {
     theme: 'dark2',
     backgroundColor: "#1e1e1e",
     animationEnabled: true,
+    interactivityEnabled: true,
     exportEnabled: false,
     axisY: {
       includeZero: true,
@@ -30,6 +32,7 @@ export class AppChartComponent {
       {
         type: 'column',
         yValueFormatString: '##°C',
+        xValueFormatString: '##/##-##H',
         color: '#01b8aa',
         dataPoints: this.parsedData,
       },
