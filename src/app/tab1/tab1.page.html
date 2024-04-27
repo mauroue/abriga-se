@@ -49,16 +49,14 @@
       <h2 style="font-size: 24px;">{{currentTemperature() | number:'1.0-0'}}°C</h2>
     </ion-card-content>
   </ion-card>
-  <ion-card [ngStyle]="{'opacity': expanded()}">
+  @if (expanded()){
+  <ion-card>
     <ion-card-header>
       <ion-card-title>Previsão do tempo</ion-card-title>
-      <!-- TODO: Fix this later -->
-      <!-- @for (time of weatherData().hourly.time; track time) { -->
-      <!-- @for (precipitation of weatherData().hourly.precipitation; track precipitation) { -->
-      <!-- <p>{{time | date: 'shortTime'}} : {{precipitation | number: '1.2-2'}}</p> -->
-      <!-- } -->
-      <!-- } -->
+      <app-chart (dataPoints)="dataPoints()"></app-chart>
     </ion-card-header>
   </ion-card>
+
+  }
 
 </ion-content>

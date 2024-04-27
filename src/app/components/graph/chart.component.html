@@ -1,0 +1,11 @@
+<div>
+    <canvasjs-chart [options]="chartOptions | async" [styles]="{width: '100%', height: '360px'}"></canvasjs-chart>
+  <div class="py-4"></div>
+@for (item of (data | async); track item){
+  <p>{{item.time}}</p>
+  <p>{{item.relativeHumidity2m}}</p>
+  <p>{{item.temperature2m}}</p>
+  <p>{{item.rain}}</p>
+  <p>{{item.precipitation}}</p>
+  }
+</div>

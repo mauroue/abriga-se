@@ -1,7 +1,8 @@
 import { Injectable, signal } from '@angular/core';
 import { fetchWeatherApi } from 'openmeteo';
-import { Observable, defer, from, map, tap } from 'rxjs';
+import { Observable, combineLatest, defer, filter, forkJoin, from, map, tap, timer } from 'rxjs';
 import { WeatherApiResponse } from '@openmeteo/sdk/weather-api-response';
+import { HourlyData, ParsedHourlyData } from './tab1/tab1.page';
 
 
 @Injectable({
@@ -22,6 +23,48 @@ export class WeatherService {
             map((response) => this.processWeatherResponse(response[0])),
             tap((res) => console.log(res)),
         );
+    public clock = timer(0, 1000)
+        .pipe(
+            map(() => new Date()),
+        )
+    public hourlyWeather = forkJoin([this.clock, this.getWeatherApi$]).pipe(
+        map(data => {
+            const parsed = data[1].hourly.time
+                .filter((time) => {
+                    if (time < data[0]) return false
+                    return true
+                })
+                .map((time, index) => {
+                    return {
+                        "time": time,
+                        "rain": data[1].hourly.rain[index],
+                        "temperature2m": data[1].hourly.temperature2m[index],
+                        "precipitation": data[1].hourly.precipitation[index],
+                        "relativeHumidity2m": data[1].hourly.relativeHumidity2m[index]
+                    }
+                })
+            console.log("hourlyWeather", parsed)
+            return parsed
+        }),
+        tap(data => console.log(data))
+    )
+    // const hourlyWeather: ParsedHourlyData[] = weatherData.hourly.time
+    //     .filter((time) => {
+    //         if (time < this.clock) return false
+    //         return true
+    //     })
+    //     .map((time, index) => {
+    //         return {
+    //             "time": time,
+    //             "rain": data.hourly.rain[index],
+    //             "temperature2m": data.hourly.temperature2m[index],
+    //             "precipitation": data.hourly.precipitation[index],
+    //             "relativeHumidity2m": data.hourly.relativeHumidity2m[index]
+    //         }
+    //     })
+    // this.dataPoints.update(() => hourlyWeather)
+    // console.log(this.dataPoints())
+    // Note: The order of weather variables in the URL query and the indices below need to match!
 
     private processWeatherResponse(response: WeatherApiResponse) {
         const range = (start: number, stop: number, step: number) =>
@@ -35,7 +78,6 @@ export class WeatherService {
         const current = response.current()!;
         const hourly = response.hourly()!;
 
-        // Note: The order of weather variables in the URL query and the indices below need to match!
         const weatherData = {
             current: {
                 time: new Date((Number(current.time()) + utcOffsetSeconds) * 1000),
@@ -56,6 +98,8 @@ export class WeatherService {
             },
 
         };
+
+
 
         // `weatherData` now contains a simple structure with arrays for datetime and weather data
         // for (let i = 0; i < weatherData.hourly.time.length; i++) {
