@@ -2,7 +2,7 @@ import { Injectable, signal } from '@angular/core';
 import { fetchWeatherApi } from 'openmeteo';
 import { Observable, combineLatest, defer, filter, forkJoin, from, map, tap, timer } from 'rxjs';
 import { WeatherApiResponse } from '@openmeteo/sdk/weather-api-response';
-import { HourlyData, ParsedHourlyData } from './tab1/tab1.page';
+import { ParsedHourlyData } from './tab1/tab1.page';
 
 
 @Injectable({
@@ -21,32 +21,32 @@ export class WeatherService {
     public getWeatherApi$ = defer(() => from(fetchWeatherApi(this.url, this.params())))
         .pipe(
             map((response) => this.processWeatherResponse(response[0])),
-            tap((res) => console.log(res)),
         );
     public clock = timer(0, 1000)
         .pipe(
             map(() => new Date()),
         )
-    public hourlyWeather = forkJoin([this.clock, this.getWeatherApi$]).pipe(
+    public hourlyWeather$: Observable<ParsedHourlyData[]> = forkJoin({ clock: this.clock, weather: this.getWeatherApi$ }).pipe(
+        tap((data) => console.log(data)),
         map(data => {
-            const parsed = data[1].hourly.time
+            console.log(data)
+            const parsed = data.weather.hourly.time
                 .filter((time) => {
-                    if (time < data[0]) return false
+                    if (time < data.clock) return false
                     return true
                 })
                 .map((time, index) => {
                     return {
                         "time": time,
-                        "rain": data[1].hourly.rain[index],
-                        "temperature2m": data[1].hourly.temperature2m[index],
-                        "precipitation": data[1].hourly.precipitation[index],
-                        "relativeHumidity2m": data[1].hourly.relativeHumidity2m[index]
+                        "rain": data.weather.hourly.rain[index],
+                        "temperature2m": data.weather.hourly.temperature2m[index],
+                        "precipitation": data.weather.hourly.precipitation[index],
+                        "relativeHumidity2m": data.weather.hourly.relativeHumidity2m[index]
                     }
                 })
             console.log("hourlyWeather", parsed)
             return parsed
         }),
-        tap(data => console.log(data))
     )
 
     private processWeatherResponse(response: WeatherApiResponse) {
