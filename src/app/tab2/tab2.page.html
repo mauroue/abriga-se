@@ -1,8 +1,6 @@
 <ion-header [translucent]="true">
   <ion-toolbar>
-    <ion-title>
-      Abrigo mais próximo
-    </ion-title>
+    <ion-title> Abrigo mais próximo </ion-title>
   </ion-toolbar>
 </ion-header>
 
@@ -12,13 +10,25 @@
       <ion-title size="large">Abrigo mais próximo</ion-title>
     </ion-toolbar>
   </ion-header>
-  <ion-card style="align-self: center;">
+  <ion-card style="align-self: center">
     <ion-card-header>
       <ion-card-title>Localização</ion-card-title>
     </ion-card-header>
     <ion-card-content>
-      <capacitor-google-map #map id="map">
-      </capacitor-google-map>
+      <capacitor-google-map #map id="map"> </capacitor-google-map>
     </ion-card-content>
   </ion-card>
+  <!-- @if (actualPermission.location === 'denied') {
+    <ion-card style="align-self: center; padding: .5rem;">
+      <span>Estamos com problema para pegar sua atual localização.</span>
+      <ion-button
+      style="margin-top: 2rem;"
+        color="medium"
+        fill="outline"
+        expand="block"
+        (click)="checkPermissions()"
+        >Permitir GPS</ion-button
+      >
+    </ion-card>
+  } -->
 </ion-content>
