@@ -9,6 +9,11 @@ import { ParsedHourlyData } from './tab1/tab1.page';
   providedIn: 'root'
 })
 export class WeatherService {
+  constructor() {
+    this.clockHandler().pipe(
+      tap((time) => this.clock.update(() => time))
+    ).subscribe()
+  }
   private url = "https://api.open-meteo.com/v1/forecast";
   private params = signal({
     "latitude": -23.76,
@@ -22,32 +27,35 @@ export class WeatherService {
     .pipe(
       map((response) => this.processWeatherResponse(response[0])),
     );
-  public clock$ = timer(0, 1000)
-    .pipe(
-      map(() => new Date()),
-    )
-  public hourlyWeather$: Observable<ParsedHourlyData[]> = forkJoin({ clock: this.clock$, weather: this.getWeatherApi$ }).pipe(
+  public clock = signal(new Date())
+  public hourlyWeather$: Observable<ParsedHourlyData[]> = this.getWeatherApi$.pipe(
     tap((data) => console.log(data)),
     map(data => {
       console.log(data)
-      const parsed = data.weather.hourly.time
+      const parsed = data.hourly.time
         .filter((time) => {
-          if (time < data.clock) return false
+          if (time < this.clock()) return false
           return true
         })
         .map((time, index) => {
           return {
             "time": time,
-            "rain": data.weather.hourly.rain[index],
-            "temperature2m": data.weather.hourly.temperature2m[index],
-            "precipitation": data.weather.hourly.precipitation[index],
-            "relativeHumidity2m": data.weather.hourly.relativeHumidity2m[index]
+            "rain": data.hourly.rain[index],
+            "temperature2m": data.hourly.temperature2m[index],
+            "precipitation": data.hourly.precipitation[index],
+            "relativeHumidity2m": data.hourly.relativeHumidity2m[index]
           }
         })
       console.log("hourlyWeather", parsed)
       return parsed
     }),
   )
+  clockHandler() {
+    return timer(0, 1000)
+      .pipe(
+        map(() => new Date()),
+      )
+  }
 
   private processWeatherResponse(response: WeatherApiResponse) {
     const range = (start: number, stop: number, step: number) =>

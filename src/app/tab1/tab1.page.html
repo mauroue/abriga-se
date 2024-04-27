@@ -9,14 +9,14 @@
 <ion-content [fullscreen]="true">
   <ion-card class="">
     <ion-card-header class="">
-      <ion-card-title style="align-self: center; font-size: 3rem;">{{ clock() | date: 'shortTime'}}</ion-card-title>
+      <ion-card-title style="align-self: center; font-size: 3rem;">{{ clock | date: 'shortTime'}}</ion-card-title>
       <ion-card-subtitle></ion-card-subtitle>
     </ion-card-header>
   </ion-card>
   <ion-card (click)="expandCard()">
     <ion-card-header>
       <ion-card-title>Ensolarado</ion-card-title>
-      <ion-card-subtitle>São Sebastião, {{ clock() | date: 'longDate' }}</ion-card-subtitle>
+      <ion-card-subtitle>São Sebastião, {{ clock | date: 'longDate' }}</ion-card-subtitle>
     </ion-card-header>
     <!-- Code 	        Description -->
     <!-- 0 	            Clear sky -->
@@ -53,7 +53,8 @@
   <ion-card>
     <ion-card-header>
       <ion-card-title>Previsão do tempo</ion-card-title>
-      <app-chart (dataPoints)="dataPoints()"></app-chart>
+
+      <!-- <app-chart (dataPoints)="dataPoints()"></app-chart> -->
     </ion-card-header>
   </ion-card>
 
