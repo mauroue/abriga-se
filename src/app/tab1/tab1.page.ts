@@ -43,9 +43,8 @@ export class Tab1Page implements OnInit {
   public clock = this.weatherService.clock()
   public weatherData = signal({} as WeatherData);
   public weatherCode = signal(0);
+  public options = this.weatherService.hourlyWeather()
   public currentTemperature = signal(0);
-  public dataPoints = signal([] as ParsedHourlyData[]);
-  public destroy$ = new BehaviorSubject<boolean>(false);
   public expanded = signal(0);
 
   constructor(

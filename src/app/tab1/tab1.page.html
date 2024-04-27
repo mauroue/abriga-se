@@ -53,11 +53,15 @@
   <ion-card>
     <ion-card-header>
       <ion-card-title>Previsão do tempo</ion-card-title>
-
-      <!-- <app-chart (dataPoints)="dataPoints()"></app-chart> -->
     </ion-card-header>
+    <ion-card-content>
+      @if (options) {
+      <div class="py-2"></div>
+      <app-chart></app-chart>
+      <div class="py-2"></div>
+      }
+    </ion-card-content>
   </ion-card>
-
   }
 
 </ion-content>

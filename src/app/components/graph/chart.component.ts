@@ -1,10 +1,8 @@
-import { Component, OnInit, input, signal } from '@angular/core';
+import { Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { CanvasJSAngularChartsModule } from '@canvasjs/angular-charts';
-import { ParsedHourlyData } from 'src/app/tab1/tab1.page';
 import { WeatherService } from 'src/app/weather.service';
-import { catchError, map, of, tap } from 'rxjs';
 
 @Component({
   selector: 'app-chart',
@@ -13,39 +11,33 @@ import { catchError, map, of, tap } from 'rxjs';
   templateUrl: './chart.component.html',
   styleUrl: './chart.component.css',
 })
-export class AppChartComponent implements OnInit {
-  dataPoints = input<ParsedHourlyData[]>()
-  hourlyWeather = this.weatherService.hourlyWeather
-  chartOptions = signal({})
+export class AppChartComponent {
+  rawWeatherData = this.weatherService.hourlyWeather()
+  parsedData = this.rawWeatherData
+    .map((data) => {
+      return { label: data.time.getHours().toString() + 'h', y: Math.round(data.temperature2m * 100) / 100 }
+    })
+  options = {
+    theme: 'dark2',
+    backgroundColor: "#1e1e1e",
+    animationEnabled: true,
+    exportEnabled: false,
+    axisY: {
+      includeZero: true,
+      valueFormatString: '##°C',
+    },
+    data: [
+      {
+        type: 'column',
+        yValueFormatString: '##°C',
+        color: '#01b8aa',
+        dataPoints: this.parsedData,
+      },
+    ],
+  };
 
   constructor(
     private weatherService: WeatherService
-  ) { }
-
-  ngOnInit(): void {
-    const options = this.hourlyWeather()
-      .map((data) => {
-        return {
-          title: {
-            text: 'Próximos Horas',
-          },
-          theme: 'dark2',
-          animationEnabled: true,
-          exportEnabled: false,
-          axisY: {
-            includeZero: true,
-            valueFormatString: '$##°C',
-          },
-          data: [
-            {
-              type: 'column',
-              yValueFormatString: '$##°C',
-              color: '#01b8aa',
-              dataPoints: data,
-            },
-          ],
-        };
-      })
-    this.chartOptions.update(() => options)
+  ) {
   }
 }
