@@ -40,7 +40,7 @@ export interface ParsedHourlyData {
 })
 export class Tab1Page implements OnInit {
   public today = new Date().getDay();
-  public clock = this.weatherService.clock
+  public clock = this.weatherService.clock$
   public weatherData = signal({} as WeatherData);
   public weatherCode = signal(0);
   public currentTemperature = signal(0);
