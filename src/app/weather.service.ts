@@ -13,8 +13,9 @@ export class WeatherService {
     this.clockHandler().pipe(
       tap((time) => this.clock.update(() => time))
     ).subscribe()
+
     this.hourlyWeather$.pipe(
-      tap((data) => this.hourlyWeather.update(() => data))
+      tap((data) => this.hourlyWeather.update(() => data)),
     ).subscribe()
   }
   private url = "https://api.open-meteo.com/v1/forecast";
@@ -33,9 +34,7 @@ export class WeatherService {
   public clock = signal(new Date())
   public hourlyWeather = signal([] as ParsedHourlyData[])
   private hourlyWeather$: Observable<ParsedHourlyData[]> = this.getWeatherApi$.pipe(
-    tap((data) => console.log(data)),
     map(data => {
-      console.log(data)
       const parsed = data.hourly.time
         .filter((time) => {
           if (time < this.clock()) return false
@@ -50,7 +49,6 @@ export class WeatherService {
             "relativeHumidity2m": data.hourly.relativeHumidity2m[index]
           }
         })
-      console.log("hourlyWeather", parsed)
       return parsed
     }),
   )
