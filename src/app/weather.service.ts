@@ -48,23 +48,6 @@ export class WeatherService {
         }),
         tap(data => console.log(data))
     )
-    // const hourlyWeather: ParsedHourlyData[] = weatherData.hourly.time
-    //     .filter((time) => {
-    //         if (time < this.clock) return false
-    //         return true
-    //     })
-    //     .map((time, index) => {
-    //         return {
-    //             "time": time,
-    //             "rain": data.hourly.rain[index],
-    //             "temperature2m": data.hourly.temperature2m[index],
-    //             "precipitation": data.hourly.precipitation[index],
-    //             "relativeHumidity2m": data.hourly.relativeHumidity2m[index]
-    //         }
-    //     })
-    // this.dataPoints.update(() => hourlyWeather)
-    // console.log(this.dataPoints())
-    // Note: The order of weather variables in the URL query and the indices below need to match!
 
     private processWeatherResponse(response: WeatherApiResponse) {
         const range = (start: number, stop: number, step: number) =>
