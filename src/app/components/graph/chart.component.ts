@@ -15,7 +15,7 @@ import { catchError, map, of, tap } from 'rxjs';
 })
 export class AppChartComponent implements OnInit {
   dataPoints = input<ParsedHourlyData[]>()
-  hourlyWeather$ = this.weatherService.hourlyWeather$
+  hourlyWeather = this.weatherService.hourlyWeather
   chartOptions = signal({})
 
   constructor(
@@ -23,9 +23,8 @@ export class AppChartComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
-    this.hourlyWeather$.pipe(
-      tap(data => console.log(data)),
-      map((data) => {
+    const options = this.hourlyWeather()
+      .map((data) => {
         return {
           title: {
             text: 'Próximos Horas',
@@ -46,10 +45,7 @@ export class AppChartComponent implements OnInit {
             },
           ],
         };
-      }),
-      tap((data) => this.chartOptions.update(() => data)),
-      catchError(err => of(console.log(err)))
-    ).subscribe()
+      })
+    this.chartOptions.update(() => options)
   }
-
 }

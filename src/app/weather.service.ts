@@ -13,6 +13,9 @@ export class WeatherService {
     this.clockHandler().pipe(
       tap((time) => this.clock.update(() => time))
     ).subscribe()
+    this.hourlyWeather$.pipe(
+      tap((data) => this.hourlyWeather.update(() => data))
+    ).subscribe()
   }
   private url = "https://api.open-meteo.com/v1/forecast";
   private params = signal({
@@ -28,7 +31,8 @@ export class WeatherService {
       map((response) => this.processWeatherResponse(response[0])),
     );
   public clock = signal(new Date())
-  public hourlyWeather$: Observable<ParsedHourlyData[]> = this.getWeatherApi$.pipe(
+  public hourlyWeather = signal([] as ParsedHourlyData[])
+  private hourlyWeather$: Observable<ParsedHourlyData[]> = this.getWeatherApi$.pipe(
     tap((data) => console.log(data)),
     map(data => {
       console.log(data)
@@ -50,7 +54,8 @@ export class WeatherService {
       return parsed
     }),
   )
-  clockHandler() {
+
+  private clockHandler() {
     return timer(0, 1000)
       .pipe(
         map(() => new Date()),
