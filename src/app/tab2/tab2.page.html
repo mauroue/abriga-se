@@ -1,18 +1,8 @@
-<ion-header
-  [translucent]="true"
->
-  <ion-toolbar>
-    <ion-title> Abrigo mais próximo </ion-title>
-  </ion-toolbar>
-</ion-header>
-
-<ion-content
-  [fullscreen]="true"
-  class="ion-padding"
->
+<div class="ion-padding"></div>
+<ion-content [fullscreen]="true" class="ion-padding">
   <ion-header collapse="condense">
     <ion-toolbar>
-      <ion-title size="large">Abrigo mais próximo</ion-title>
+      <ion-title size="large">Mapa</ion-title>
     </ion-toolbar>
   </ion-header>
   <ion-card style="align-self: center">
@@ -23,6 +13,14 @@
       <capacitor-google-map #map id="map"> </capacitor-google-map>
     </ion-card-content>
   </ion-card>
+  <ion-card>
+    <div style="text-align: center; padding: 10px">
+      <ion-button class="" id="open-add-modal">Definir lugar seguro</ion-button>
+      <div></div>
+      <ion-button>Ir até lugar seguro</ion-button>
+    </div>
+  </ion-card>
+
   <!-- @if (actualPermission.location === 'denied') {
     <ion-card style="align-self: center; padding: .5rem;">
       <span>Estamos com problema para pegar sua atual localização.</span>
