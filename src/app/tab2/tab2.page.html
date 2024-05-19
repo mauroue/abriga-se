@@ -4,18 +4,33 @@
     <ion-toolbar>
       <ion-title size="large">Mapa</ion-title>
     </ion-toolbar>
+    {{currentLocation | async}} {{permission | async}}
   </ion-header>
   <ion-card style="align-self: center">
     <ion-card-header>
       <ion-card-title>Localização</ion-card-title>
     </ion-card-header>
     <ion-card-content>
-      <capacitor-google-map #map id="map"> </capacitor-google-map>
+      <google-map
+        mapId="MAIN_MAP"
+        class="align-self-center"
+        [options]="options"
+        height="{{mapHeight}}"
+        width="{{mapWidth}}"
+        [center]="center"
+        [zoom]="zoom"
+        (mapClick)="addMarker($event)"
+      >
+        @for (position of listOfSafePoints; track position) {
+        <map-advanced-marker [position]="position" />
+        }
+        <map-advanced-marker [position]="markerPosition" />
+      </google-map>
     </ion-card-content>
   </ion-card>
   <ion-card>
     <div style="text-align: center; padding: 10px">
-      <ion-button class="" id="open-add-modal">Definir lugar seguro</ion-button>
+      <ion-button (click)="addSafePoint()">Definir lugar seguro</ion-button>
       <div></div>
       <ion-button>Ir até lugar seguro</ion-button>
     </div>

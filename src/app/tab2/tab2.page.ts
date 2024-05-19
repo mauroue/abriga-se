@@ -1,28 +1,38 @@
-import {
-  AfterViewInit,
-  CUSTOM_ELEMENTS_SCHEMA,
-  Component,
-  ElementRef,
-  OnInit,
-  Signal,
-  ViewChild,
-  signal,
-} from '@angular/core';
+import { CUSTOM_ELEMENTS_SCHEMA, Component } from '@angular/core';
 import {
   IonHeader,
   IonToolbar,
   IonTitle,
   IonContent,
+  IonCard,
+  IonCardHeader,
+  IonCardTitle,
+  IonCardContent,
+  IonButton,
 } from '@ionic/angular/standalone';
 import { ExploreContainerComponent } from '../explore-container/explore-container.component';
-import { GoogleMap } from '@capacitor/google-maps';
-import { environment } from 'src/environments/environment';
 import {
-  Geolocation,
-  PermissionStatus,
-  Position,
-} from '@capacitor/geolocation';
-import { BehaviorSubject } from 'rxjs';
+  GoogleMap,
+  MapAdvancedMarker,
+  MapDirectionsService,
+  MapDirectionsRenderer,
+} from '@angular/google-maps';
+
+import { environment } from 'src/environments/environment';
+import { Loader } from '@googlemaps/js-api-loader';
+import { from, map, of, tap } from 'rxjs';
+import { Geolocation } from '@capacitor/geolocation';
+import { AsyncPipe } from '@angular/common';
+
+const loader = new Loader({
+  apiKey: environment.apiKey,
+  version: 'weekly',
+});
+
+const DEFAULT_LAT = -23.76;
+const DEFAULT_LNG = -45.4097;
+const MAP_WIDTH = '340px';
+const MAP_HEIGHT = '500px';
 
 @Component({
   selector: 'app-tab2',
@@ -30,109 +40,61 @@ import { BehaviorSubject } from 'rxjs';
   styleUrls: ['tab2.page.scss'],
   standalone: true,
   imports: [
+    AsyncPipe,
     IonHeader,
     IonToolbar,
     IonTitle,
     IonContent,
     ExploreContainerComponent,
+    GoogleMap,
+    MapAdvancedMarker,
+    IonCard,
+    IonCardHeader,
+    IonCardTitle,
+    IonCardContent,
+    IonButton,
   ],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
 })
-export class Tab2Page implements OnInit {
-  @ViewChild('map')
-  mapRef: ElementRef<HTMLElement>;
-  apiKey = environment.apiKey;
-  newMap: GoogleMap| any;
-  currentLocation : BehaviorSubject<Position | GeolocationPosition | any> =
-    new BehaviorSubject({});
-  actualPermission: PermissionStatus;
+export class Tab2Page {
+  mapWidth = MAP_WIDTH;
+  mapHeight = MAP_HEIGHT;
+  center: google.maps.LatLngLiteral = { lat: DEFAULT_LAT, lng: DEFAULT_LNG };
+  zoom = 8;
+  options = {
+    disableDefaultUI: true,
+  } as google.maps.MapOptions;
+  display: google.maps.LatLngLiteral;
+  markerPosition: google.maps.LatLngLiteral;
+  listOfSafePoints: Set<google.maps.LatLngLiteral> = new Set();
+  currentLocation = from(Geolocation.getCurrentPosition()).pipe(
+    tap((data) => console.log(data)),
+  );
+  permission = from(Geolocation.checkPermissions()).pipe(
+    tap((data) => console.log(data)),
+  );
 
-  constructor() {}
-
-  ngOnInit(): void {
-    this.checkPermissions().then(() => {
-      if (this.actualPermission.location == 'granted') {
-    this.watchCurrentLocation().then();
-  }else {
-        this.checkPermissions().then();
-      }
-    });
+  constructor() {
+    loader.importLibrary('maps');
+    loader.importLibrary('marker');
+    loader.importLibrary('routes');
   }
 
-  async createMap(position: GeolocationPosition): Promise<any> {
-    if (!this.newMap) {
-    this.newMap = await GoogleMap.create({
-      id: 'my-map',
-      element: this.mapRef.nativeElement,
-      apiKey: this.apiKey,
-      config: {
-        center: {
-          lat: position?.coords?.latitude,
-            lng: position?.coords?.longitude,
-          },
-          zoom: 16,
-        },
-      }).then();
-    } else {
-      this.newMap.setCamera({
-        center: {
-          lat: position?.coords?.latitude,
-          lng: position?.coords?.longitude,
-        },
-        zoom: 16, });
-    }
+  addMarker(event: google.maps.MapMouseEvent) {
+    if (event.latLng !== null) this.markerPosition = event.latLng.toJSON();
   }
 
-  async createPin(position: GeolocationPosition) {
-    await this.newMap.addMarker({
-      coordinate: {
-        lat: position?.coords?.latitude,
-        lng: position?.coords?.longitude,
-      },
-    });
-  }
-      async checkPermissions() {
-    this.actualPermission = await Geolocation.checkPermissions();
-
-    if (this.actualPermission.location == 'denied') {
-      await Geolocation.requestPermissions();
-    }
+  addSafePoint() {
+    console.log(this.markerPosition);
+    console.log(this.listOfSafePoints);
+    this.listOfSafePoints.add(this.markerPosition);
   }
 
-  // async getCurrentLocation(): Promise<any> {
-  //   try {
-  //     const position: Position = await Geolocation.getCurrentPosition({
-  //       enableHighAccuracy: true,
-  //       timeout: 3000,
-  //     });
-  //     return position?.coords;
-  //   } catch (err) {
-  //     console.error(err);
-  //     return null;
-  //   }
+  // calculateRoute(directionService: google.maps.DirectionsService) {
+  //   directionService.route({
+  //     origin: {
+  //       query: document.getElementById('start') as HTMLInputElement,
+  //     },
+  //   });
   // }
-
-  async watchCurrentLocation(): Promise<any> {
-    try {
-      await Geolocation.watchPosition(
-        {
-          timeout: 5000,
-          enableHighAccuracy: true,
-          maximumAge: 0,
-        },
-        (position) => {
-          this.currentLocation.next(position);
-          this.createMap(this.currentLocation.getValue()).then(() => {
-            this.createPin(this.currentLocation.getValue()).then();
-          });
-        }
-      );
-    } catch (err) {
-      if (!this.currentLocation.getValue()) {
-        this.watchCurrentLocation();
-      }
-      console.error(err);
-      return null;
-    }
-  }
 }
