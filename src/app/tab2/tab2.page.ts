@@ -9,6 +9,7 @@ import {
   IonCardTitle,
   IonCardContent,
   IonButton,
+  IonLoading,
 } from '@ionic/angular/standalone';
 import { ExploreContainerComponent } from '../explore-container/explore-container.component';
 import {
@@ -22,7 +23,7 @@ import { environment } from 'src/environments/environment';
 import { Loader } from '@googlemaps/js-api-loader';
 import { BehaviorSubject, from, map, of, switchMap, tap } from 'rxjs';
 import { Geolocation } from '@capacitor/geolocation';
-import { AsyncPipe } from '@angular/common';
+import { AsyncPipe, JsonPipe } from '@angular/common';
 
 const loader = new Loader({
   apiKey: environment.apiKey,
@@ -54,6 +55,8 @@ const MAP_HEIGHT = '500px';
     IonCardContent,
     IonButton,
     MapDirectionsRenderer,
+    JsonPipe,
+    IonLoading,
   ],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
 })
@@ -62,16 +65,32 @@ export class Tab2Page {
   mapHeight = MAP_HEIGHT;
   center: google.maps.LatLngLiteral = { lat: DEFAULT_LAT, lng: DEFAULT_LNG };
   zoom = 14;
-  // options = {
-  //   disableDefaultUI: true,
-  // } as google.maps.MapOptions;
+  options = {
+    disableDefaultUI: true,
+  } as google.maps.MapOptions;
   display: google.maps.LatLngLiteral;
   markerPosition: google.maps.LatLngLiteral;
   listOfSafePoints: Set<google.maps.LatLngLiteral> = new Set();
   currentLocation = signal({} as google.maps.LatLngLiteral);
+  currentLocation$ = from(
+    Geolocation.watchPosition({ enableHighAccuracy: true }, (result, err) => {
+      if (err) {
+        this.loadingGps = true;
+      }
+      if (result) {
+        const location: google.maps.LatLngLiteral = {
+          lat: result.coords.latitude,
+          lng: result?.coords.longitude,
+        };
+        this.currentLocation.update(() => location);
+        this.loadingGps = false;
+      }
+    }),
+  );
   permission = from(Geolocation.checkPermissions()).pipe(
     tap((data) => console.log(data)),
   );
+  loadingGps = true;
   directionRequest$ = new BehaviorSubject({} as google.maps.DirectionsRequest);
   directionResult$ = this.directionRequest$.pipe(
     switchMap((request) =>
@@ -96,14 +115,6 @@ export class Tab2Page {
     this.listOfSafePoints.add(this.markerPosition);
   }
 
-  // calculateRoute(directionService: google.maps.DirectionsService) {
-  //   directionService.route({
-  //     origin: {
-  //       query: document.getElementById('start') as HTMLInputElement,
-  //     },
-  //   });
-  // }
-  //
   getRoute() {
     const requestDirection = {
       destination: { lat: -23.792612154668166, lng: -45.401664982198255 },

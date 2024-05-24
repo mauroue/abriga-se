@@ -1,10 +1,16 @@
 <div class="ion-padding"></div>
+@if (loadingGps === true){
+<ion-loading
+  message="carregando posição do gps..."
+  spinner="circles"
+></ion-loading>
+}
 <ion-content [fullscreen]="true" class="ion-padding">
   <ion-header collapse="condense">
     <ion-toolbar>
       <ion-title size="large">Mapa</ion-title>
     </ion-toolbar>
-    {{currentLocation() }} {{permission | async}}
+    {{permission | async}}
   </ion-header>
   <ion-card style="align-self: center">
     <ion-card-header>
@@ -14,6 +20,7 @@
       <google-map
         mapId="MAIN_MAP"
         class="align-self-center"
+        [options]="options"
         height="{{mapHeight}}"
         width="{{mapWidth}}"
         [center]="center"
@@ -22,10 +29,11 @@
       >
         @if (directionResult$ | async; as directionResults) {
         <map-directions-renderer [directions]="directionResults" />
-        its loaded } @for (position of listOfSafePoints; track position) {
+        } @for (position of listOfSafePoints; track position) {
         <map-advanced-marker [position]="position" />
         }
         <map-advanced-marker [position]="markerPosition" />
+        {{currentLocation() | json }}
       </google-map>
     </ion-card-content>
   </ion-card>
