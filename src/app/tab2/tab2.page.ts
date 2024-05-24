@@ -1,4 +1,4 @@
-import { CUSTOM_ELEMENTS_SCHEMA, Component } from '@angular/core';
+import { CUSTOM_ELEMENTS_SCHEMA, Component, signal } from '@angular/core';
 import {
   IonHeader,
   IonToolbar,
@@ -20,7 +20,7 @@ import {
 
 import { environment } from 'src/environments/environment';
 import { Loader } from '@googlemaps/js-api-loader';
-import { from, map, of, tap } from 'rxjs';
+import { BehaviorSubject, from, map, of, switchMap, tap } from 'rxjs';
 import { Geolocation } from '@capacitor/geolocation';
 import { AsyncPipe } from '@angular/common';
 
@@ -53,6 +53,7 @@ const MAP_HEIGHT = '500px';
     IonCardTitle,
     IonCardContent,
     IonButton,
+    MapDirectionsRenderer,
   ],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
 })
@@ -60,21 +61,26 @@ export class Tab2Page {
   mapWidth = MAP_WIDTH;
   mapHeight = MAP_HEIGHT;
   center: google.maps.LatLngLiteral = { lat: DEFAULT_LAT, lng: DEFAULT_LNG };
-  zoom = 8;
-  options = {
-    disableDefaultUI: true,
-  } as google.maps.MapOptions;
+  zoom = 14;
+  // options = {
+  //   disableDefaultUI: true,
+  // } as google.maps.MapOptions;
   display: google.maps.LatLngLiteral;
   markerPosition: google.maps.LatLngLiteral;
   listOfSafePoints: Set<google.maps.LatLngLiteral> = new Set();
-  currentLocation = from(Geolocation.getCurrentPosition()).pipe(
-    tap((data) => console.log(data)),
-  );
+  currentLocation = signal({} as google.maps.LatLngLiteral);
   permission = from(Geolocation.checkPermissions()).pipe(
     tap((data) => console.log(data)),
   );
+  directionRequest$ = new BehaviorSubject({} as google.maps.DirectionsRequest);
+  directionResult$ = this.directionRequest$.pipe(
+    switchMap((request) =>
+      this.mapService.route(request).pipe(tap((data) => console.log(data))),
+    ),
+    map((request) => request.result),
+  );
 
-  constructor() {
+  constructor(private mapService: MapDirectionsService) {
     loader.importLibrary('maps');
     loader.importLibrary('marker');
     loader.importLibrary('routes');
@@ -97,4 +103,16 @@ export class Tab2Page {
   //     },
   //   });
   // }
+  //
+  getRoute() {
+    const requestDirection = {
+      destination: { lat: -23.792612154668166, lng: -45.401664982198255 },
+      origin: {
+        lat: -23.7785534354166,
+        lng: -45.40370346097021,
+      } /* { lat: data.coords.latitude, lng: data.coords.longitude }, */,
+      travelMode: google.maps.TravelMode.WALKING,
+    };
+    this.directionRequest$.next(requestDirection);
+  }
 }

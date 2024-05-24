@@ -4,7 +4,7 @@
     <ion-toolbar>
       <ion-title size="large">Mapa</ion-title>
     </ion-toolbar>
-    {{currentLocation | async}} {{permission | async}}
+    {{currentLocation() }} {{permission | async}}
   </ion-header>
   <ion-card style="align-self: center">
     <ion-card-header>
@@ -14,14 +14,15 @@
       <google-map
         mapId="MAIN_MAP"
         class="align-self-center"
-        [options]="options"
         height="{{mapHeight}}"
         width="{{mapWidth}}"
         [center]="center"
         [zoom]="zoom"
         (mapClick)="addMarker($event)"
       >
-        @for (position of listOfSafePoints; track position) {
+        @if (directionResult$ | async; as directionResults) {
+        <map-directions-renderer [directions]="directionResults" />
+        its loaded } @for (position of listOfSafePoints; track position) {
         <map-advanced-marker [position]="position" />
         }
         <map-advanced-marker [position]="markerPosition" />
@@ -32,7 +33,7 @@
     <div style="text-align: center; padding: 10px">
       <ion-button (click)="addSafePoint()">Definir lugar seguro</ion-button>
       <div></div>
-      <ion-button>Ir até lugar seguro</ion-button>
+      <ion-button (click)="getRoute()">Ir até lugar seguro</ion-button>
     </div>
   </ion-card>
 
