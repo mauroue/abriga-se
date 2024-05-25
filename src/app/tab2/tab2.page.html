@@ -30,7 +30,7 @@
         @if (directionResult$ | async; as directionResults) {
           <map-directions-renderer [directions]="directionResults"/>
         }
-        @for (safePoint of listOfSafePoints; track safePoint) {
+        @for (safePoint of listOfSafePoints(); track safePoint) {
           <map-advanced-marker [position]="safePoint.location"/>
         }
         <map-advanced-marker [position]="markerPosition.location"/>
@@ -54,7 +54,7 @@
       </ion-modal>
       <div></div>
       <ion-list>
-        @for (safe of listOfSafePoints; track safe) {
+        @for (safe of listOfSafePoints(); track safe) {
           <li class="d-flex align-items-center">
             <span class="text">{{ safe.name }}</span>
             <div class="px-1"></div>

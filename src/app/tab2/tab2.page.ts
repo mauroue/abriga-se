@@ -3,6 +3,7 @@ import {
   CUSTOM_ELEMENTS_SCHEMA,
   signal,
   ViewChild,
+  WritableSignal,
 } from '@angular/core';
 import {
   IonBackButton,
@@ -94,7 +95,7 @@ export class Tab2Page {
     disableDefaultUI: true,
   } as google.maps.MapOptions;
   markerPosition: SafePlace;
-  listOfSafePoints: Set<SafePlace> = new Set();
+  listOfSafePoints: WritableSignal<Set<SafePlace>> = signal(new Set());
   currentLocation = signal({} as google.maps.LatLngLiteral);
   currentLocation$ = from(
     Geolocation.watchPosition({ enableHighAccuracy: true }, (result, err) => {
@@ -130,16 +131,12 @@ export class Tab2Page {
     loader.importLibrary('maps').then(() => {});
     loader.importLibrary('marker').then(() => {});
     loader.importLibrary('routes').then(() => {});
-    if (this.localStorageService.getItem('saved')) {
-      let i = 0;
-      while (true) {
-        i++;
-        let item = this.localStorageService.getItem(i.toString());
-        console.log('item', i);
+    if (this.localStorageService.length() > 0) {
+      for (let i = 0; i < this.localStorageService.length(); i++) {
+        const item = this.localStorageService.getItem(i.toString());
         if (item !== null) {
-          this.listOfSafePoints.add(JSON.parse(item));
+          this.listOfSafePoints.update((set) => set.add(JSON.parse(item)));
         } else {
-          console.log('breaking');
           break;
         }
       }
@@ -160,7 +157,7 @@ export class Tab2Page {
     if (this.markerPosition) {
       this.markerPosition.name = name;
       console.log(`Added ${this.markerPosition.name}, to safe point.`);
-      this.listOfSafePoints.add(this.markerPosition);
+      this.listOfSafePoints.update((item) => item.add(this.markerPosition));
       this.saveToStorage();
     }
   }
@@ -169,13 +166,10 @@ export class Tab2Page {
     if (!this.localStorageService.getItem('saved')) {
       this.localStorageService.setItem('saved', 'true');
     }
-    let i = 0;
-    this.listOfSafePoints.forEach((item) => {
-      this.localStorageService.setItem(
-        (i + 1).toString(),
-        JSON.stringify(item),
-      );
-    });
+    const array = Array.from(this.listOfSafePoints());
+    for (let i = 0; i < array.length; i++) {
+      this.localStorageService.setItem(`${i}`, JSON.stringify(array[i]));
+    }
   }
 
   getRoute(dest: SafePlace) {
