@@ -55,11 +55,15 @@
       <div></div>
       <ion-list>
         @for (safe of listOfSafePoints(); track safe) {
-          <li class="d-flex align-items-center">
-            <span class="text">{{ safe.name }}</span>
-            <div class="px-1"></div>
-            <ion-button size="small" (click)="getRoute(safe)">Ir até lugar seguro</ion-button>
-          </li>
+          <ion-item class="d-flex align-items-center">
+            <div>
+              <span class="text">{{ safe.name }}</span>
+            </div>
+            <ion-button size="small" (click)="getRoute(safe)">Ir</ion-button>
+            <ion-button size="small" (click)="removeSafePoint(safe)">
+              <ion-icon slot="icon-only" name="trash-sharp"></ion-icon>
+            </ion-button>
+          </ion-item>
         }
       </ion-list>
     </div>

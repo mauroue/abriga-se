@@ -14,7 +14,9 @@ import {
   IonCardTitle,
   IonContent,
   IonHeader,
+  IonIcon,
   IonInput,
+  IonItem,
   IonList,
   IonLoading,
   IonModal,
@@ -37,6 +39,8 @@ import { Geolocation } from '@capacitor/geolocation';
 import { AsyncPipe, DecimalPipe, JsonPipe } from '@angular/common';
 import { LocalStorageService } from '../local-storage.service';
 import { FormsModule } from '@angular/forms';
+import { addIcons } from 'ionicons';
+import { trashSharp } from 'ionicons/icons';
 
 const loader = new Loader({
   apiKey: environment.apiKey,
@@ -81,6 +85,8 @@ export interface SafePlace {
     FormsModule,
     IonBackButton,
     IonList,
+    IonIcon,
+    IonItem,
   ],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
 })
@@ -131,6 +137,7 @@ export class Tab2Page {
     loader.importLibrary('maps').then(() => {});
     loader.importLibrary('marker').then(() => {});
     loader.importLibrary('routes').then(() => {});
+    addIcons({ trashSharp });
     if (this.localStorageService.length() > 0) {
       for (let i = 0; i < this.localStorageService.length(); i++) {
         const item = this.localStorageService.getItem(i.toString());
@@ -157,15 +164,25 @@ export class Tab2Page {
     if (this.markerPosition) {
       this.markerPosition.name = name;
       console.log(`Added ${this.markerPosition.name}, to safe point.`);
-      this.listOfSafePoints.update((item) => item.add(this.markerPosition));
+      this.listOfSafePoints.update((item) => {
+        item.add(this.markerPosition);
+        return item;
+      });
       this.saveToStorage();
     }
   }
 
+  removeSafePoint(safe: SafePlace) {
+    this.listOfSafePoints.update((item) => {
+      console.log(safe, item);
+      item.delete(safe);
+      return item;
+    });
+    this.saveToStorage();
+  }
+
   saveToStorage() {
-    if (!this.localStorageService.getItem('saved')) {
-      this.localStorageService.setItem('saved', 'true');
-    }
+    this.localStorageService.clear();
     const array = Array.from(this.listOfSafePoints());
     for (let i = 0; i < array.length; i++) {
       this.localStorageService.setItem(`${i}`, JSON.stringify(array[i]));
