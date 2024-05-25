@@ -1,16 +1,15 @@
+@if (loadingGps) {
+  <ion-loading
+    message="carregando posição do gps..."
+    spinner="circles"
+  >loading
+  </ion-loading>
+}
 <div class="ion-padding"></div>
-@if (loadingGps === true){
-<ion-loading
-  message="carregando posição do gps..."
-  spinner="circles"
-></ion-loading>
+@if (currentLocation$ | async) {
 }
 <ion-content [fullscreen]="true" class="ion-padding">
   <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">Mapa</ion-title>
-    </ion-toolbar>
-    {{permission | async}}
   </ion-header>
   <ion-card style="align-self: center">
     <ion-card-header>
@@ -27,35 +26,42 @@
         [zoom]="zoom"
         (mapClick)="addMarker($event)"
       >
+        <map-advanced-marker [position]="currentLocation()"/>
         @if (directionResult$ | async; as directionResults) {
-        <map-directions-renderer [directions]="directionResults" />
-        } @for (position of listOfSafePoints; track position) {
-        <map-advanced-marker [position]="position" />
+          <map-directions-renderer [directions]="directionResults"/>
         }
-        <map-advanced-marker [position]="markerPosition" />
-        {{currentLocation() | json }}
+        @for (safePoint of listOfSafePoints; track safePoint) {
+          <map-advanced-marker [position]="safePoint.location"/>
+        }
+        <map-advanced-marker [position]="markerPosition.location"/>
       </google-map>
     </ion-card-content>
   </ion-card>
   <ion-card>
     <div style="text-align: center; padding: 10px">
-      <ion-button (click)="addSafePoint()">Definir lugar seguro</ion-button>
+      <ion-button id="openModal">Adicionar lugar seguro</ion-button>
+      <ion-modal trigger="openModal" (willDismiss)="onWillDismiss($event)">
+        <ng-template>
+          <div class="ion-align-self-center">
+            <div class="ion-padding"></div>
+            <ion-input label="Insira o Nome do lugar" labelPlacement="stacked" type="text"
+                       placeholder="lugar seguro"
+                       [(ngModel)]="nameInput"></ion-input>
+            <ion-button (click)="confirm()">Confirmar</ion-button>
+            <ion-button (click)="cancel()">Voltar</ion-button>
+          </div>
+        </ng-template>
+      </ion-modal>
       <div></div>
-      <ion-button (click)="getRoute()">Ir até lugar seguro</ion-button>
+      <ion-list>
+        @for (safe of listOfSafePoints; track safe) {
+          <li class="d-flex align-items-center">
+            <span class="text">{{ safe.name }}</span>
+            <div class="px-1"></div>
+            <ion-button size="small" (click)="getRoute(safe)">Ir até lugar seguro</ion-button>
+          </li>
+        }
+      </ion-list>
     </div>
   </ion-card>
-
-  <!-- @if (actualPermission.location === 'denied') {
-    <ion-card style="align-self: center; padding: .5rem;">
-      <span>Estamos com problema para pegar sua atual localização.</span>
-      <ion-button
-      style="margin-top: 2rem;"
-        color="medium"
-        fill="outline"
-        expand="block"
-        (click)="checkPermissions()"
-        >Permitir GPS</ion-button
-      >
-    </ion-card>
-  } -->
 </ion-content>
