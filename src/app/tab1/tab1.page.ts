@@ -20,6 +20,7 @@ import {
 } from 'ionicons/icons';
 import { AppChartComponent } from '../components/graph/chart.component';
 import { IonHeader, IonTitle, IonToolbar } from '@ionic/angular/standalone';
+import { Router } from '@angular/router';
 
 registerLocaleData(localePt);
 
@@ -76,7 +77,6 @@ export interface ParsedHourlyData {
   ],
 })
 export class Tab1Page implements OnInit {
-  public today = new Date().getDay();
   public clock = this.weatherService.clock();
   public weatherData = signal({} as WeatherData);
   public weatherCode = signal(0);
@@ -85,7 +85,10 @@ export class Tab1Page implements OnInit {
   public expanded = signal(0);
   public alert = signal(this.weatherService.highRain());
 
-  constructor(private weatherService: WeatherService) {
+  constructor(
+    private weatherService: WeatherService,
+    private router: Router,
+  ) {
     addIcons({ partlySunnyOutline, sunnyOutline, alertCircleOutline });
   }
 
@@ -106,6 +109,6 @@ export class Tab1Page implements OnInit {
   }
 
   findSafePlace() {
-    console.log('finding');
+    this.router.navigate(['tabs', 'tab2', true]);
   }
 }

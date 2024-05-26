@@ -40,7 +40,12 @@ import { AsyncPipe, DecimalPipe, JsonPipe } from '@angular/common';
 import { LocalStorageService } from '../local-storage.service';
 import { FormsModule } from '@angular/forms';
 import { addIcons } from 'ionicons';
-import { trashSharp } from 'ionicons/icons';
+import {
+  checkmarkCircleOutline,
+  shieldCheckmarkOutline,
+  trashSharp,
+} from 'ionicons/icons';
+import { ActivatedRoute } from '@angular/router';
 
 const loader = new Loader({
   apiKey: environment.apiKey,
@@ -55,6 +60,7 @@ const MAP_HEIGHT = '500px';
 export interface SafePlace {
   location: google.maps.LatLngLiteral;
   name: string;
+  default?: true;
 }
 
 @Component({
@@ -100,7 +106,7 @@ export class Tab2Page {
   options = {
     disableDefaultUI: true,
   } as google.maps.MapOptions;
-  markerPosition: SafePlace;
+  markerPosition: SafePlace = {} as SafePlace;
   listOfSafePoints: WritableSignal<Set<SafePlace>> = signal(new Set());
   currentLocation = signal({} as google.maps.LatLngLiteral);
   currentLocation$ = from(
@@ -122,10 +128,20 @@ export class Tab2Page {
     tap((data) => console.log(data)),
   );
   loadingGps = true;
+  alert = signal(false);
   directionRequest$ = new BehaviorSubject({} as google.maps.DirectionsRequest);
   directionResult$ = this.directionRequest$.pipe(
     switchMap((request) =>
-      this.mapService.route(request).pipe(tap((data) => console.log(data))),
+      this.mapService
+        .route(request)
+        .pipe(
+          tap((data) =>
+            this.localStorageService.setItem(
+              'currentLocation',
+              JSON.stringify(data),
+            ),
+          ),
+        ),
     ),
     map((request) => request.result),
   );
@@ -133,11 +149,18 @@ export class Tab2Page {
   constructor(
     private mapService: MapDirectionsService,
     private localStorageService: LocalStorageService,
+    private activatedRoute: ActivatedRoute,
   ) {
+    this.activatedRoute.params.subscribe((params) => {
+      if (params && params['alert']) {
+        this.alert.set(true);
+        this.getClosestSafePlace();
+      }
+    });
     loader.importLibrary('maps').then(() => {});
     loader.importLibrary('marker').then(() => {});
     loader.importLibrary('routes').then(() => {});
-    addIcons({ trashSharp });
+    addIcons({ trashSharp, shieldCheckmarkOutline, checkmarkCircleOutline });
     if (this.localStorageService.length() > 0) {
       for (let i = 0; i < this.localStorageService.length(); i++) {
         const item = this.localStorageService.getItem(i.toString());
@@ -148,6 +171,28 @@ export class Tab2Page {
         }
       }
     }
+  }
+
+  getClosestSafePlace() {
+    let dest;
+    this.listOfSafePoints().forEach((safe) => {
+      if (safe.default) {
+        dest = safe;
+      }
+    });
+    if (dest) this.getRoute(dest);
+  }
+
+  setDefault(safePlace: SafePlace) {
+    this.listOfSafePoints().delete(safePlace);
+    this.listOfSafePoints().forEach((item) => {
+      if (item.default) {
+        delete item.default;
+      }
+    });
+    safePlace.default = true;
+    this.listOfSafePoints().add(safePlace);
+    this.saveToStorage();
   }
 
   addMarker(event: google.maps.MapMouseEvent) {
@@ -189,7 +234,12 @@ export class Tab2Page {
   }
 
   getRoute(dest: SafePlace) {
-    const origin = this.currentLocation();
+    let origin = this.currentLocation();
+    if (origin === ({} as google.maps.LatLngLiteral)) {
+      const storage = this.localStorageService.getItem('currentLocation');
+      console.log(storage);
+      if (storage) origin = JSON.parse(storage);
+    }
     const requestDirection = {
       destination: dest.location,
       origin:
