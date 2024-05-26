@@ -33,6 +33,7 @@ export class WeatherService {
     );
   public clock = signal(new Date())
   public hourlyWeather = signal([] as ParsedHourlyData[])
+  public highRain = signal(false)
   private hourlyWeather$: Observable<ParsedHourlyData[]> = this.getWeatherApi$.pipe(
     map(data => {
       const parsed = data.hourly.time
@@ -41,6 +42,9 @@ export class WeatherService {
           return true
         })
         .map((time, index) => {
+          if (data.hourly.rain[index] > 150) {
+            this.highRain.set(true)
+          }
           return {
             "time": time,
             "rain": data.hourly.rain[index],
@@ -92,21 +96,7 @@ export class WeatherService {
       },
 
     };
-
-
-
-    // `weatherData` now contains a simple structure with arrays for datetime and weather data
-    // for (let i = 0; i < weatherData.hourly.time.length; i++) {
-    //     console.log(
-    //         weatherData.hourly.time[i].toISOString(),
-    //         weatherData.hourly.temperature2m[i],
-    //         weatherData.hourly.relativeHumidity2m[i],
-    //         weatherData.hourly.precipitation[i],
-    //         weatherData.hourly.rain[i]
-    //     );
-    // }
     return weatherData
-
   }
 
 }

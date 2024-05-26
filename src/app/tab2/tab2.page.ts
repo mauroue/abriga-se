@@ -174,7 +174,6 @@ export class Tab2Page {
 
   removeSafePoint(safe: SafePlace) {
     this.listOfSafePoints.update((item) => {
-      console.log(safe, item);
       item.delete(safe);
       return item;
     });

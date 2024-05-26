@@ -2,3 +2,7 @@ ion-icon {
   color: white;
   font-size: 64px;
 }
+
+.alert-container {
+  grid-template-columns: 1fr 3fr;
+}

@@ -1,18 +1,32 @@
 <div class="ion-padding"></div>
-<ion-content class="ion-padding" [fullscreen]="false">
-  <ion-card class="">
+<ion-content [fullscreen]="false" class="ion-padding">
+  <ion-card>
     <ion-card-header class="">
       <ion-card-title style="align-self: center; font-size: 3rem"
-        >{{ clock | date: 'shortTime'}}</ion-card-title
+      >{{ clock | date: 'shortTime' }}
+      </ion-card-title
       >
       <ion-card-subtitle></ion-card-subtitle>
     </ion-card-header>
   </ion-card>
+  @if (!alert()) {
+    <ion-card (click)="findSafePlace()">
+      <ion-card-content style="display:grid;grid-template-columns: 1fr 3fr;">
+        <ion-icon name="alert-circle-outline"></ion-icon>
+        <div>
+          <div style="padding-top: 10px"></div>
+          <p>Alerta de chuvas intensas!</p>
+          <p>Click para procurar um abrigo!</p>
+        </div>
+      </ion-card-content>
+    </ion-card>
+  }
   <ion-card (click)="expandCard()">
     <ion-card-header>
       <ion-card-title>Ensolarado</ion-card-title>
       <ion-card-subtitle
-        >São Sebastião, {{ clock | date: 'longDate' }}</ion-card-subtitle
+      >São Sebastião, {{ clock | date: 'longDate' }}
+      </ion-card-subtitle
       >
     </ion-card-header>
     <!-- Code 	        Description -->
@@ -30,32 +44,36 @@
     <!-- 95 * 	        Thunderstorm: Slight or moderate -->
     <ion-card-content style="display: flex">
       <!-- @TODO: Add weather icons -->
-      @switch (weatherCode()) { @case (0) {
-      <ion-icon name="sunny-outline"></ion-icon>
-      } @case (3) {
-      <ion-icon name="partly-sunny-outline"></ion-icon>
-      } @default {
-      <!-- TODO: replace this with loading  -->
-      <ion-icon name="sunny-outline"></ion-icon>
-      } }
+      @switch (weatherCode()) {
+        @case (0) {
+          <ion-icon name="sunny-outline"></ion-icon>
+        }
+        @case (3) {
+          <ion-icon name="partly-sunny-outline"></ion-icon>
+        }
+        @default {
+          <!-- TODO: replace this with loading  -->
+          <ion-icon name="sunny-outline"></ion-icon>
+        }
+      }
       <div style="padding: 6px"></div>
       <h2 style="font-size: 24px">
-        {{currentTemperature() | number:'1.0-0'}}°C
+        {{ currentTemperature() | number:'1.0-0' }}°C
       </h2>
     </ion-card-content>
   </ion-card>
-  @if (expanded()){
-  <ion-card>
-    <ion-card-header>
-      <ion-card-title>Previsão do tempo</ion-card-title>
-    </ion-card-header>
-    <ion-card-content>
-      @if (options) {
-      <div class="py-2"></div>
-      <app-chart></app-chart>
-      <div class="py-2"></div>
-      }
-    </ion-card-content>
-  </ion-card>
+  @if (expanded()) {
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>Previsão do tempo</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        @if (options) {
+          <div class="py-2"></div>
+          <app-chart></app-chart>
+          <div class="py-2"></div>
+        }
+      </ion-card-content>
+    </ion-card>
   }
 </ion-content>

@@ -1,28 +1,31 @@
-import {Component, LOCALE_ID, OnInit, signal} from '@angular/core';
-import {ExploreContainerComponent} from '../explore-container/explore-container.component';
-import {BehaviorSubject, map, tap, timer} from 'rxjs';
+import { Component, LOCALE_ID, OnInit, signal } from '@angular/core';
+import { ExploreContainerComponent } from '../explore-container/explore-container.component';
+import { tap } from 'rxjs';
 import {
   AsyncPipe,
   CommonModule,
   DATE_PIPE_DEFAULT_OPTIONS,
   DatePipe,
   DecimalPipe,
-  registerLocaleData
+  registerLocaleData,
 } from '@angular/common';
 import localePt from '@angular/common/locales/pt';
-import {WeatherService} from '../weather.service';
-import {IonicModule} from '@ionic/angular';
-import {addIcons} from 'ionicons';
-import {sunnyOutline, partlySunnyOutline} from 'ionicons/icons';
-import {AppChartComponent} from '../components/graph/chart.component';
-import {IonHeader, IonTitle, IonToolbar} from "@ionic/angular/standalone";
+import { WeatherService } from '../weather.service';
+import { IonicModule } from '@ionic/angular';
+import { addIcons } from 'ionicons';
+import {
+  alertCircleOutline,
+  partlySunnyOutline,
+  sunnyOutline,
+} from 'ionicons/icons';
+import { AppChartComponent } from '../components/graph/chart.component';
+import { IonHeader, IonTitle, IonToolbar } from '@ionic/angular/standalone';
 
 registerLocaleData(localePt);
 
 export interface WeatherData {
-  current: CurrentData,
-  hourly: HourlyData
-
+  current: CurrentData;
+  hourly: HourlyData;
 }
 
 export interface CurrentData {
@@ -56,36 +59,53 @@ export interface ParsedHourlyData {
   styleUrls: ['tab1.page.scss'],
   standalone: true,
   providers: [
-    {provide: LOCALE_ID, useValue: 'pt-BR'},
-    {provide: DATE_PIPE_DEFAULT_OPTIONS, useValue: {locale: 'pt-BR'}}
+    { provide: LOCALE_ID, useValue: 'pt-BR' },
+    { provide: DATE_PIPE_DEFAULT_OPTIONS, useValue: { locale: 'pt-BR' } },
   ],
-  imports: [IonicModule, ExploreContainerComponent, DatePipe, AsyncPipe, DecimalPipe, CommonModule, AppChartComponent, IonHeader, IonTitle, IonToolbar],
+  imports: [
+    IonicModule,
+    ExploreContainerComponent,
+    DatePipe,
+    AsyncPipe,
+    DecimalPipe,
+    CommonModule,
+    AppChartComponent,
+    IonHeader,
+    IonTitle,
+    IonToolbar,
+  ],
 })
 export class Tab1Page implements OnInit {
   public today = new Date().getDay();
-  public clock = this.weatherService.clock()
+  public clock = this.weatherService.clock();
   public weatherData = signal({} as WeatherData);
   public weatherCode = signal(0);
-  public options = this.weatherService.hourlyWeather()
+  public options = this.weatherService.hourlyWeather();
   public currentTemperature = signal(0);
   public expanded = signal(0);
+  public alert = signal(this.weatherService.highRain());
 
-  constructor(
-    private weatherService: WeatherService,
-  ) {
-    addIcons({partlySunnyOutline, sunnyOutline});
+  constructor(private weatherService: WeatherService) {
+    addIcons({ partlySunnyOutline, sunnyOutline, alertCircleOutline });
   }
 
   ngOnInit(): void {
     this.weatherService.getWeatherApi$
       .pipe(
         tap((data) => this.weatherData.update(() => data)),
-        tap(data => this.weatherCode.update(() => data.current.weatherCode)),
-        tap(data => this.currentTemperature.update(() => data.current.temperature2m)),
-      ).subscribe()
+        tap((data) => this.weatherCode.update(() => data.current.weatherCode)),
+        tap((data) =>
+          this.currentTemperature.update(() => data.current.temperature2m),
+        ),
+      )
+      .subscribe();
   }
 
   expandCard() {
-    this.expanded.update(() => this.expanded() === 0 ? 1 : 0);
+    this.expanded.update(() => (this.expanded() === 0 ? 1 : 0));
+  }
+
+  findSafePlace() {
+    console.log('finding');
   }
 }
